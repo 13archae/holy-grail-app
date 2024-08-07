@@ -3,7 +3,7 @@ var app = express();
 var redis_client = require("@redis/client");
 
 const redisClient = redis_client.createClient(
-  "redis[s]://[[username][:password]@localhost:6379/534babfa76686437fb85c0947cf57b269afe8dd759a17ebb45bea0ed75f91f41]"
+  "redis://default:@142.93.207.209:6379"
 );
 console.log("redisClient:  ", redisClient); //
 
@@ -18,7 +18,6 @@ app.use(express.static("public"));
 
 // init values
 redisClient.mSet("header", 0, "left", 0, "article", 0, "right", 0, "footer", 0);
-console.log("three");
 redisClient.mGet(
   ["header", "left", "article", "right", "footer"],
   function (err, value) {
@@ -31,7 +30,7 @@ redisClient.mGet(
 
 function data() {
   return new Promise((resolve, reject) => {
-    redis_client.get(
+    redis_client.mGet(
       ["header", "left", "article", "right", "footer"],
       function (err, value) {
         const data = {
