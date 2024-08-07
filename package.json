@@ -1,0 +1,24 @@
+{
+  "name": "react-holygrail",
+  "version": "0.0.1",
+  "description": "holy grail area data using Redis name/value DB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kogsio/react-holygrail.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kogsio/react-holygrail/issues"
+  },
+  "homepage": "https://github.com/kogsio/react-holygrail#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "redis": "^4.7.0",
+    "superagent": "^10.0.0"
+  }
+}

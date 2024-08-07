@@ -1,0 +1,41 @@
+.grid {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  grid-template-rows: auto 1fr auto;
+  gap: 5px;
+  height: 90vh;
+}
+.section {
+  font-size: 1.8em;
+  font-weight: 800;
+}
+header,
+aside,
+article,
+footer {
+  border-style: solid;
+  border-color: lime;
+  font-size: 1em;
+}
+aside {
+  background: lightgray;
+}
+article {
+  background: #ffccd6;
+}
+header,
+footer {
+  grid-column: 1 / 4;
+  background: #94c9fa;
+}
+
+body {
+  font-family: Arial;
+}
+button {
+  font-size: 1em;
+}
+img {
+  height: 32px;
+  width: 32px;
+}
