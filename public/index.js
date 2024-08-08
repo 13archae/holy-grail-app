@@ -1,11 +1,10 @@
-const API_URL = "http://127.0.0.1:3000";
-const superagent = require("superagent");
-const prefix = require("superagent-prefix");
-console.log("ONE");
-const API_CLIENT = superagent.agent().use(prefix(API_URL));
-console.log("TWO");
+const API_URL = "http://localhost:3000";
+const API_CLIENT = superagent;
+
 function PlusMinus(props) {
   function handle(e) {
+    console.log("event.target.id: ", e.target.id);
+    console.log("PLusMinusProps: ", props);
     if (e.target.id.includes("minus")) {
       props.handle({ name: props.section, value: -1 });
       return;
@@ -18,12 +17,18 @@ function PlusMinus(props) {
       <img
         src={`icons/${props.section}_plus.png`}
         id="plus"
-        onClick={(e) => handle(e)}
+        onClick={(e) => {
+          console.log("event: ", e);
+          handle(e);
+        }}
       />
       <img
         src={`icons/${props.section}_minus.png`}
         id="minus"
-        onClick={(e) => handle(e)}
+        onClick={(e) => {
+          console.log("event: ", e);
+          handle(e);
+        }}
       />
     </>
   );
@@ -42,7 +47,7 @@ function Data(props) {
 
 function update(section, value) {
   return new Promise((resolve, reject) => {
-    var url = `/update/${section}/${value}`;
+    var url = `${API_URL}/update/${section}/${value}`;
     API_CLIENT.get(url).end(function (err, res) {
       err ? reject(null) : resolve(res.body);
     });
@@ -51,7 +56,7 @@ function update(section, value) {
 
 function read() {
   return new Promise((resolve, reject) => {
-    var url = `/data`;
+    var url = `${API_URL}/data`;
     API_CLIENT.get(url).end(function (err, res) {
       err ? reject(null) : resolve(res.body);
     });
