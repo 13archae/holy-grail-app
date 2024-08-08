@@ -20,6 +20,6 @@
     "express": "^4.17.1",
     "redis": "^4.7.0",
     "superagent": "^10.0.0",
-    "superagentai-js": "^0.2.40"
+    "superagent-prefix": "^0.0.2"
   }
 }

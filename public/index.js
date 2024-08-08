@@ -1,11 +1,9 @@
 const API_URL = "http://127.0.0.1:3000";
-//const SuperAgentClient = require("superagentai-js");
-//const SuperAgentClient = require("superagentai-js");
-
-const API_CLIENT = new SuperAgentClient({
-  environment: API_URL,
-});
-
+const superagent = require("superagent");
+const prefix = require("superagent-prefix");
+console.log("ONE");
+const API_CLIENT = superagent.agent().use(prefix(API_URL));
+console.log("TWO");
 function PlusMinus(props) {
   function handle(e) {
     if (e.target.id.includes("minus")) {
@@ -16,6 +14,7 @@ function PlusMinus(props) {
   }
   return (
     <>
+      <script>console.log('FIVE');</script>
       <img
         src={`icons/${props.section}_plus.png`}
         id="plus"
@@ -31,6 +30,7 @@ function PlusMinus(props) {
 }
 
 function Data(props) {
+  console.log("THREE");
   return (
     <div>
       Header: {props.data.header}, Left: {props.data.left}, Article:{" "}
@@ -52,11 +52,9 @@ function update(section, value) {
 function read() {
   return new Promise((resolve, reject) => {
     var url = `/data`;
-    API_CLIENT.get(url)
-      .use(prefix(API_URL))
-      .end(function (err, res) {
-        err ? reject(null) : resolve(res.body);
-      });
+    API_CLIENT.get(url).end(function (err, res) {
+      err ? reject(null) : resolve(res.body);
+    });
   });
 }
 

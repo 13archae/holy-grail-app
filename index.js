@@ -1,53 +1,104 @@
-var express = require("express");
+const express = require("express");
+const { static } = require("express");
 var app = express();
-var redis_client = require("@redis/client");
+const { createClient, get, set, quit, SchemaFieldTypes } = require("redis");
 
-const redisClient = redis_client.createClient(
-  "redis://default:@142.93.207.209:6379"
-);
+console.log("SEVEN");
+
+const redisClient = createClient();
 console.log("redisClient:  ", redisClient); //
 
-//redis_client.("error", (err) => console.log("Redis Client Error", err));
+redisClient.on("error", (err) => console.log("Redis Client Error:  ", err));
 
 if (!redisClient.isOpen) {
   redisClient.connect();
 }
-
+console.log("EIGHT");
 // serve static files from public directory
-app.use(express.static("public"));
+app.use(static("./public"));
+
+console.log("NINE");
+// Create an index.
+// https://redis.io/commands/ft.create/
+try {
+  redisClient.ft.create(
+    "idx:holygrail",
+    {
+      "$.header": {
+        type: SchemaFieldTypes.NUMERIC,
+        AS: "header",
+      },
+      "$.left": {
+        type: SchemaFieldTypes.NUMERIC,
+        AS: "left",
+      },
+      "$.right": {
+        type: SchemaFieldTypes.NUMERIC,
+        AS: "right",
+      },
+      "$.article": {
+        type: SchemaFieldTypes.NUMERIC,
+        AS: "article",
+      },
+      "$.footer": {
+        type: SchemaFieldTypes.NUMERIC,
+        AS: "footer",
+      },
+    },
+    {
+      ON: "JSON",
+      PREFIX: "noderedis:holygrail",
+    }
+  );
+} catch (e) {
+  if (e.message === "Index already exists") {
+    console.log("Index exists already, skipped creation.");
+  } else {
+    console.error(e);
+    process.exit(1);
+  }
+}
+
+console.log("TEN");
 
 // init values
-redisClient.mSet("header", 0, "left", 0, "article", 0, "right", 0, "footer", 0);
-redisClient.mGet(
-  ["header", "left", "article", "right", "footer"],
-  function (err, value) {
-    if (err) {
-      throw err;
-    }
-    console.log(value);
-  }
-);
+const set_promise = new Promise((resolve, reject) => {
+  const set_ret = redisClient.json.set(
+    "tracking_obj",
+    "$",
+    '{ "header": 0, "left": 0, "article": 0, "right": 0, "footer": 0 }'
+  );
+  resolve(set_ret);
+}).catch((error) => {
+  console.error("ERROR: ", error);
+});
+
+set_promise.then((value) => {
+  console.log("set_promise_val", value);
+});
+console.log("TWELVE");
+
+redisClient.json.get("tracking_obj", "$").catch((error) => {
+  console.error("Error on get:  ", error);
+});
 
 function data() {
   return new Promise((resolve, reject) => {
-    redis_client.mGet(
-      ["header", "left", "article", "right", "footer"],
-      function (err, value) {
-        const data = {
-          header: Number(value[0]),
-          left: Number(value[1]),
-          article: Number(value[2]),
-          right: Number(value[3]),
-          footer: Number(value[4]),
-        };
-        err ? reject(null) : resolve(data);
-      }
-    );
+    redisClient.json.get("tracking_obj", function (err, value) {
+      const data = {
+        header: Number(value[0]),
+        left: Number(value[1]),
+        article: Number(value[2]),
+        right: Number(value[3]),
+        footer: Number(value[4]),
+      };
+      err ? reject(null) : resolve(data);
+    });
   });
 }
 
 // get key data
-redisClient.mGet("/data", function (req, res) {
+redisClient.json.get("/data", function (req, res) {
   data().then((data) => {
     console.log(data);
     res.send(data);
@@ -55,13 +106,13 @@ redisClient.mGet("/data", function (req, res) {
 });
 
 // plus
-redisClient.mGet("/update/:key/:value", function (req, res) {
+redisClient.json.set("/update/:key/:value", function (req, res) {
   const key = req.params.key;
   let value = Number(req.params.value);
-  redis_client.mGet(key, function (err, reply) {
+  redisClient.json.get(key, function (err, reply) {
     // new value
     value = Number(reply) + value;
-    redis_client.mSet(key, value);
+    redisClient.json.set(key, value);
 
     // return data to client
     data().then((data) => {
@@ -76,6 +127,6 @@ app.listen(3000, () => {
 });
 
 process.on("exit", function () {
-  redis_client.quit();
+  quit();
   console.log("Session End:  ", Date.now());
 });
