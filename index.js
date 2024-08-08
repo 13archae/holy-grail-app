@@ -3,26 +3,26 @@ const { static } = require("express");
 var app = express();
 const { createClient, get, set, quit, SchemaFieldTypes } = require("redis");
 
-console.log("SEVEN");
-
-const redisClient = createClient();
+const redisClient = createClient({ host: "127.0.0.1", port: "6379", db: 0 });
 console.log("redisClient:  ", redisClient); //
-
-redisClient.on("error", (err) => console.log("Redis Client Error:  ", err));
 
 if (!redisClient.isOpen) {
   redisClient.connect();
 }
-console.log("EIGHT");
+
+redisClient.on("error", (err) => console.log("redis client error:  ", err));
+
+redisClient.on("connect", () => {
+  console.log("Connected!");
+});
 // serve static files from public directory
 app.use(static("./public"));
 
-console.log("NINE");
 // Create an index.
 // https://redis.io/commands/ft.create/
 try {
   redisClient.ft.create(
-    "idx:holygrail",
+    "idx:holygrail-idx",
     {
       "$.header": {
         type: SchemaFieldTypes.NUMERIC,
@@ -52,14 +52,11 @@ try {
   );
 } catch (e) {
   if (e.message === "Index already exists") {
-    console.log("Index exists already, skipped creation.");
+    console.error("Index exists already, skipped creation.");
   } else {
-    console.error(e);
-    process.exit(1);
+    console.error("Index-create: Other error", e);
   }
 }
-
-console.log("TEN");
 
 // init values
 const set_promise = new Promise((resolve, reject) => {
@@ -73,10 +70,13 @@ const set_promise = new Promise((resolve, reject) => {
   console.error("ERROR: ", error);
 });
 
-set_promise.then((value) => {
-  console.log("set_promise_val", value);
-});
-console.log("TWELVE");
+set_promise
+  .then((value) => {
+    console.log("set_promise_val", value);
+  })
+  .catch((error) => {
+    console.error("set_promise.then():  ", error);
+  });
 
 redisClient.json.get("tracking_obj", "$").catch((error) => {
   console.error("Error on get:  ", error);
