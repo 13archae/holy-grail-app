@@ -34,7 +34,7 @@ function PlusMinus(props) {
 }
 
 function Data(props) {
-  console.log("*** in Data() - props: " + JSON.stringify(props));
+  console.log("*** in Data() - props: " + props);
   return (
     <div>
       Header: {props.data.header}, Left: {props.data.left}, Article:
@@ -50,16 +50,19 @@ async function update(section, value) {
     console.log("URL: ", url);
     API_CLIENT.get(url)
       .then((res) => {
-        console.log("res.body", res.body);
-
-        resolve(res.body);
+        if (res) {
+          console.log("*** res", res);
+          resolve(res);
+        } else {
+          console.log(`res: ${res}`);
+        }
       })
       .catch((err) => {
         console.log("/update get() error", err);
-        reject(null);
       });
   }).catch((err) => {
     console.log("/update get() error", err);
+    reject(null);
   });
 }
 
@@ -68,11 +71,11 @@ async function read() {
     var url = `${API_URL}/data`;
     API_CLIENT.get(url)
       .then((res) => {
-        console.log("read() get() res.body", res.body);
-        resolve(res.body);
+        console.log("read() get() res X : ", res);
+        resolve(res);
       })
       .catch((err) => {
-        console.log("/update get() error", err);
+        console.log("read()  get() error", err);
         reject(null);
       });
   });
@@ -91,7 +94,9 @@ function App() {
     // read db data & update UI
     read()
       .then((res) => {
-        setData(JSON.parse(res.body));
+        console.log("useEffect res: ", res);
+
+        //setData(res);
       })
       .catch((err) => {
         console.log("read() error:  ", err);
@@ -102,8 +107,9 @@ function App() {
     // update db & local state
     update(section.name, section.value)
       .then((res) => {
-        console.log("props.handle() get() success", res);
-        setData(JSON.parse(res));
+        const res_body = res.body;
+        console.log("props.handle() get() success", res_body);
+        setData(res_body);
       })
       .catch((err) => {
         console.log("props.handle get() error", err);

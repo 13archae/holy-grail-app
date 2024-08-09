@@ -47,7 +47,7 @@ REDIS_CLIENT.hSet("tracking_obj", "screen_data", JSON.stringify(json))
   });
 
 // serve static files from public directory
-app.use(static("./public"));
+//app.use(static("./public"));
 
 /**
  * Function : data
@@ -56,26 +56,29 @@ app.use(static("./public"));
  */
 function data() {
   return new Promise((resolve, reject) => {
-    REDIS_CLIENT.hGet("tracking_obj", "screen_data", function (err, value) {
-      if (err) {
-        console.log("error in data() on hGet");
-        throw err;
-      }
+    REDIS_CLIENT.hGet("tracking_obj", "screen_data")
+      .then((data_string) => {
+        console.log(`hGet Success:  ${data_string}`);
 
-      console.log(`hGet Success:  ${value}`);
+        //const value_obj = JSON.parse(value);
 
-      const value_obj = JSON.parse(value);
+        // const data = {
+        //   header : Number(value_obj[0]),
+        //   left : Number(value_obj[1]),
+        //   article: Number(value_obj[2]),
+        //   right: Number(value_obj[3]),
+        //   footer: Number(value_obj[4])
+        // };
 
-      const data = {
-        header: Number(value_obj[0]),
-        left: Number(value_obj[1]),
-        article: Number(value_obj[2]),
-        right: Number(value_obj[3]),
-        footer: Number(value_obj[4]),
-      };
-      data_string = JSON.stringify(data);
-      err ? reject(null) : resolve(data);
-    });
+        //data_string = JSON.stringify(value);
+        console.log("data() data_string : ", data_string);
+
+        resolve(data_string);
+      })
+      .catch((err) => {
+        console.log("data() error", err);
+        reject(null);
+      });
   });
 }
 
@@ -85,9 +88,9 @@ function data() {
 app.get("/data", (req, res) => {
   console.log("*** in /data endpoint ***");
   data()
-    .then((data) => {
-      console.log(data);
-      res.send(data);
+    .then((outData) => {
+      console.log(outData);
+      res.send(" " + outData);
     })
     .catch((err) => {
       console.log("app.get() /data error", err);
@@ -100,31 +103,29 @@ app.get("/data", (req, res) => {
  */
 app.get("/update/:key/:value", (req, res) => {
   console.log(`*** in /update endpoint ***`);
-  const key = req.params.key;
-  let value = Number(req.params.value);
-  console.log(`KEY: ${key}  ::  VALUE: ${value}`);
-  REDIS_CLIENT.hGet(
-    "tracking_obj",
-    "screen_data",
-    function (err, track_obj_out) {
-      if (err) {
-        console.log("/update hGet error: ", err);
-        res.send(null);
+  const req_key = req.params.key;
+  const req_value = Number(req.params.value);
+  console.log(`req_key: ${req_key}  ::  req_value: ${req_value}`);
+  REDIS_CLIENT.hGet("tracking_obj", "screen_data")
+    .then((str_JSON) => {
+      console.log("/update hGet() : Object Found: ", str_JSON);
+
+      if (!str_JSON) {
+        console.log("/update hGet() str_JSON error: ", err);
+        res.status(404).send("/update hGet str_JSON error: " + err);
       }
 
-      console.log("/update hGet() : Object Found: ", track_obj_out);
-
-      let track_obj = JSON.parse(track_obj_out);
-      let key_value = track_obj[key];
+      let track_obj = JSON.parse(str_JSON);
+      let key_value = track_obj[req_key];
 
       // new value
-      new_value = key_value + value;
+      const new_value = Number(key_value) + Number(req_value);
 
-      track_obj[key] = new_value;
+      track_obj[req_key] = new_value;
 
-      let track_obj_in = JSON.stringify(track_obj);
+      let track_obj_JSON = JSON.stringify(track_obj);
 
-      REDIS_CLIENT.hSet("tracking_obj", "screen_data", track_obj_in)
+      REDIS_CLIENT.hSet("tracking_obj", "screen_data", track_obj_JSON)
         .then((response) => {
           console.log("hSet() in /update SUCCESS : values set: ", response);
         })
@@ -134,16 +135,21 @@ app.get("/update/:key/:value", (req, res) => {
 
       // return data to client
       data()
-        .then((data) => {
-          res.send(data);
+        .then((in_data) => {
+          console.log("in_data", in_data);
+
+          res.send(in_data);
         })
         .catch((err) => {
           console.log("/update data() call error:  ", err);
         });
-    }
-  ).catch((err) => {
-    console.log("/update data() error: ", err);
-  });
+    })
+    .catch((err) => {
+      if (err) {
+        console.log("/update hGet() error: ", err);
+        res.status(404).send("/update hGet: ", err);
+      }
+    });
 });
 
 app.listen(3000, () => {
