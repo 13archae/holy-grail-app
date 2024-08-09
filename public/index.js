@@ -4,7 +4,7 @@ const API_CLIENT = superagent;
 function PlusMinus(props) {
   function handle(e) {
     console.log("event.target.id: ", e.target.id);
-    console.log("PLusMinusProps: ", props);
+    console.log("PlusMinusProps: ", props);
     if (e.target.id.includes("minus")) {
       props.handle({ name: props.section, value: -1 });
       return;
@@ -38,7 +38,7 @@ function Data(props) {
   console.log("THREE");
   return (
     <div>
-      Header: {props.data.header}, Left: {props.data.left}, Article:{" "}
+      Header: {props.data.header}, Left: {props.data.left}, Article:
       {props.data.article}, Right: {props.data.right}, Footer:{" "}
       {props.data.footer}
     </div>
@@ -48,7 +48,12 @@ function Data(props) {
 function update(section, value) {
   return new Promise((resolve, reject) => {
     var url = `${API_URL}/update/${section}/${value}`;
-    API_CLIENT.get(url).end(function (err, res) {
+    console.log("URL: ", url);
+    API_CLIENT.get(url).then(function (err, res) {
+      if (err) {
+        console.log("get() error", e);
+      }
+      console.log("res.body", res.body);
       err ? reject(null) : resolve(res.body);
     });
   });
@@ -57,7 +62,7 @@ function update(section, value) {
 function read() {
   return new Promise((resolve, reject) => {
     var url = `${API_URL}/data`;
-    API_CLIENT.get(url).end(function (err, res) {
+    API_CLIENT.get(url).then(function (err, res) {
       err ? reject(null) : resolve(res.body);
     });
   });

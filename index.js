@@ -1,11 +1,12 @@
 const express = require("express");
 const { static } = require("express");
+//const { useParams } = require("react-router-dom");
 var app = express();
 const cors = require("cors");
 const corsOpts = {
   origin: "*",
   methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"],
+  allowedHeaders: ["Content-Type", "Access-Control-Allow-Origin"],
 };
 app.use(cors(corsOpts));
 
@@ -39,9 +40,9 @@ const json = {
 };
 
 redisClient
-  .hSet("tracking_obj", json)
+  .hSet("tracking_obj", "screen_data", JSON.stringify(json))
   .then((value) => {
-    console.log("set_promise_val", value);
+    console.log("set fields updated: ", value);
   })
   .catch((e) => {
     console.log("error in init set", e);
@@ -50,9 +51,23 @@ redisClient
 // serve static files from public directory
 app.use(static("./public"));
 
+/**
+ * Function : data
+ *
+ * @returns  Promise
+ */
 function data() {
   return new Promise((resolve, reject) => {
-    redisClient.hGet("tracking_obj", "$", function (err, value) {
+    redisClient.hGet("tracking_obj", "screen_data", function (err, value) {
+      if (err) {
+        console.log("error in data() on hGet");
+        throw err;
+      }
+
+      console.log(`hGet Success:  ${value}`);
+
+      const val_string = JSON.parse(value);
+
       const data = {
         header: Number(value[0]),
         left: Number(value[1]),
@@ -60,6 +75,7 @@ function data() {
         right: Number(value[3]),
         footer: Number(value[4]),
       };
+      data_string = JSON.stringify(data);
       err ? reject(null) : resolve(data);
     });
   });
@@ -73,19 +89,41 @@ app.get("/data", function (req, res) {
   });
 });
 
-// plus
+/**
+ *
+ */
 app.get("/update/:key/:value", function (req, res) {
+  console.log(`in update endpoint`);
   const key = req.params.key;
   let value = Number(req.params.value);
-  redisClient.get(key, function (err, reply) {
+  console.log(`KEY: ${key}  ::  VALUE: ${value}`);
+  redisClient.hGet("tracking_obj", "screen_data", (err, track_obj_out) => {
+    // Error Catcher
+    if (err) {
+      console.log("No Data Object Found");
+      throw err;
+    }
+
+    console.log("Object Found: ", track_obj_out);
+
+    let track_obj = JSON.parse(track_obj_out);
+    let key_value = track_obj[key];
+
     // new value
-    value = Number(reply) + value;
-    redisClient.set(key, value);
+    new_value = key_value + value;
+
+    track_obj[key] = new_value;
+
+    let track_obj_in = JSON.stringify();
+
+    redisClient.hSet("tracking_obj", "screen_data", track_obj_in);
 
     // return data to client
     data().then((data) => {
       console.log(data);
-      res.send(data);
+      res.send(data).catch((e) => {
+        console.log("Error: update() call to data()", e);
+      });
     });
   });
 });
