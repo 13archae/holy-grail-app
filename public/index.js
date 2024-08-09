@@ -13,7 +13,6 @@ function PlusMinus(props) {
   }
   return (
     <>
-      <script>console.log('FIVE');</script>
       <img
         src={`icons/${props.section}_plus.png`}
         id="plus"
@@ -35,36 +34,47 @@ function PlusMinus(props) {
 }
 
 function Data(props) {
-  console.log("THREE");
+  console.log("*** in Data() - props: " + JSON.stringify(props));
   return (
     <div>
       Header: {props.data.header}, Left: {props.data.left}, Article:
-      {props.data.article}, Right: {props.data.right}, Footer:{" "}
+      {props.data.article}, Right: {props.data.right}, Footer:
       {props.data.footer}
     </div>
   );
 }
 
-function update(section, value) {
-  return new Promise((resolve, reject) => {
+async function update(section, value) {
+  return await new Promise((resolve, reject) => {
     var url = `${API_URL}/update/${section}/${value}`;
     console.log("URL: ", url);
-    API_CLIENT.get(url).then(function (err, res) {
-      if (err) {
-        console.log("get() error", e);
-      }
-      console.log("res.body", res.body);
-      err ? reject(null) : resolve(res.body);
-    });
+    API_CLIENT.get(url)
+      .then((res) => {
+        console.log("res.body", res.body);
+
+        resolve(res.body);
+      })
+      .catch((err) => {
+        console.log("/update get() error", err);
+        reject(null);
+      });
+  }).catch((err) => {
+    console.log("/update get() error", err);
   });
 }
 
-function read() {
-  return new Promise((resolve, reject) => {
+async function read() {
+  return await new Promise((resolve, reject) => {
     var url = `${API_URL}/data`;
-    API_CLIENT.get(url).then(function (err, res) {
-      err ? reject(null) : resolve(res.body);
-    });
+    API_CLIENT.get(url)
+      .then((res) => {
+        console.log("read() get() res.body", res.body);
+        resolve(res.body);
+      })
+      .catch((err) => {
+        console.log("/update get() error", err);
+        reject(null);
+      });
   });
 }
 
@@ -79,16 +89,25 @@ function App() {
 
   React.useEffect(() => {
     // read db data & update UI
-    const response = read().then((res) => {
-      setData(res);
-    });
+    read()
+      .then((res) => {
+        setData(JSON.parse(res.body));
+      })
+      .catch((err) => {
+        console.log("read() error:  ", err);
+      });
   }, []);
 
   function handle(section) {
     // update db & local state
-    const response = update(section.name, section.value).then((res) => {
-      setData(res);
-    });
+    update(section.name, section.value)
+      .then((res) => {
+        console.log("props.handle() get() success", res);
+        setData(JSON.parse(res));
+      })
+      .catch((err) => {
+        console.log("props.handle get() error", err);
+      });
   }
 
   return (
