@@ -41,7 +41,7 @@ const json = {
 
 REDIS_CLIENT.hSet("tracking_obj", "screen_data", JSON.stringify(json))
   .then((value) => {
-    console.log("set fields updated: ", value);
+    console.log("init DB: ", value);
   })
   .catch((e) => {
     console.log("error in init set", e);

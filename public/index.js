@@ -71,8 +71,8 @@ async function read() {
     var url = `${API_URL}/data`;
     API_CLIENT.get(url)
       .then((res) => {
-        console.log("read() get() res X : ", res);
-        resolve(res);
+        console.log("read() get() res.text : ", res.text);
+        resolve(res.text);
       })
       .catch((err) => {
         console.log("read()  get() error", err);
@@ -94,9 +94,10 @@ function App() {
     // read db data & update UI
     read()
       .then((res) => {
-        console.log("useEffect res.text: ", res.text);
+        console.log("useEffect res screen_data: ", res);
+        const screen_data_obj = JSON.parse(res);
 
-        setData(res.text);
+        setData(screen_data_obj);
       })
       .catch((err) => {
         console.log("read() error:  ", err);
@@ -108,9 +109,9 @@ function App() {
     update(section.name, section.value)
       .then((res) => {
         console.log("res in handle()" + res);
-        const res_str = JSON.stringify(res);
-        console.log("handle() get() success", res_str);
-        setData(res_str);
+        const screen_data_obj = JSON.parse(res);
+
+        setData(screen_data_obj);
       })
       .catch((err) => {
         console.log("props.handle get() error", err);
