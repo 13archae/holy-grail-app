@@ -51,10 +51,10 @@ async function update(section, value) {
     API_CLIENT.get(url)
       .then((res) => {
         if (res) {
-          console.log("*** res", res);
-          resolve(res);
+          console.log("*** res.text", res.text);
+          resolve(res.text);
         } else {
-          console.log(`res: ${res}`);
+          console.log(`*** res: NULL`);
         }
       })
       .catch((err) => {
@@ -94,9 +94,9 @@ function App() {
     // read db data & update UI
     read()
       .then((res) => {
-        console.log("useEffect res: ", res);
+        console.log("useEffect res.text: ", res.text);
 
-        //setData(res);
+        setData(res.text);
       })
       .catch((err) => {
         console.log("read() error:  ", err);
@@ -107,9 +107,10 @@ function App() {
     // update db & local state
     update(section.name, section.value)
       .then((res) => {
-        const res_body = res.body;
-        console.log("props.handle() get() success", res_body);
-        setData(res_body);
+        console.log("res in handle()" + res);
+        const res_str = JSON.stringify(res);
+        console.log("handle() get() success", res_str);
+        setData(res_str);
       })
       .catch((err) => {
         console.log("props.handle get() error", err);

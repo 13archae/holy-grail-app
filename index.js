@@ -13,6 +13,7 @@ app.use(cors(corsOpts));
 
 const REDIS_CLIENT = createClient({
   url: "redis://:@127.0.0.1:6379/0",
+  connectTimeout: 10000,
 });
 console.log("REDIS_CLIENT:  ", REDIS_CLIENT);
 
@@ -47,7 +48,7 @@ REDIS_CLIENT.hSet("tracking_obj", "screen_data", JSON.stringify(json))
   });
 
 // serve static files from public directory
-//app.use(static("./public"));
+app.use(static("./public"));
 
 /**
  * Function : data
@@ -90,7 +91,7 @@ app.get("/data", (req, res) => {
   data()
     .then((outData) => {
       console.log(outData);
-      res.send(" " + outData);
+      res.send(outData);
     })
     .catch((err) => {
       console.log("app.get() /data error", err);
