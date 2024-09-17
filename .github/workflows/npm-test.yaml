@@ -22,7 +22,7 @@ jobs:
           cache: "npm"
           check-latest: false
 
-      - run: npm installl
+      - run: npm install
 
       - run: npm run build --if-present
 
