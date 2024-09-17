@@ -4,16 +4,16 @@
   "description": "holy grail area data using Redis name/value DB",
   "main": "index.js",
   "engines": {
-    "node": "12.18.2"
+    "node": "14.21.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kogsio/react-holygrail.git"
   },
-  "author": "",
+  "author": "Chris Ridout",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kogsio/react-holygrail/issues"
