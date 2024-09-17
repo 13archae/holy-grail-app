@@ -1,7 +1,7 @@
 //const HOLY_GRAIL = require("./index.js");
 
 describe("holy-grail-app", () => {
-  test("not null", async () => {
+  test("not null", () => {
     expect("cat").toEqual("cat");
   });
 });
