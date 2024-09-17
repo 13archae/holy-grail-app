@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "holy grail area data using Redis name/value DB",
   "main": "index.js",
+  "engines": {
+    "node": "14.21.3"
+  }
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
