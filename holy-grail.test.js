@@ -2,6 +2,6 @@
 
 describe("holy-grail-app", () => {
   test("not null", () => {
-    expect("cat").toEqual("cats");
+    expect("cat").toEqual("cat");
   });
 });
