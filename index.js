@@ -1,6 +1,5 @@
 const express = require("express");
-const { static } = require("express");
-const { createClient, quit } = require("redis");
+const { createClient, quit } = require("@node-redis/client");
 const cors = require("cors");
 const corsOpts = {
   origin: "*",
@@ -12,7 +11,7 @@ var app = express();
 app.use(cors(corsOpts));
 
 const REDIS_CLIENT = createClient({
-  url: "redis://:@127.0.0.1:6379/0",
+  url: "redis://default:0VAMxueUaV9KqJvK1zjAekMOwVnKX41p@redis-10925.c8.us-east-1-4.ec2.redns.redis-cloud.com:10925",
   connectTimeout: 10000,
 });
 console.log("REDIS_CLIENT:  ", REDIS_CLIENT);
@@ -48,7 +47,7 @@ REDIS_CLIENT.hSet("tracking_obj", "screen_data", JSON.stringify(json))
   });
 
 // serve static files from public directory
-app.use(static("./public"));
+app.use(express.static("public"));
 
 /**
  * Function : data
