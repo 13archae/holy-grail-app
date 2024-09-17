@@ -24,11 +24,12 @@ while (true) {
 }
 
 REDIS_CLIENT.on("error", (err) => {
-  throw err
-}));
+  throw err;
+});
 
 REDIS_CLIENT.on("connect", () => {
   //console.log("Connected!");
+  let two = 1 + 1;
 });
 
 // init values
